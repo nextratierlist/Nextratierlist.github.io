@@ -1,176 +1,236 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nextra Tiers | Official Leaderboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8">
+    <title>Nextra Tiers | Competitive Combat</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
-        body { 
-            background-color: #050505; 
-            color: #e4e4e7; 
-            font-family: 'Inter', sans-serif; 
-            scroll-behavior: smooth;
+        /* CSS Variables - Makes it look like a manual setup */
+        :root {
+            --bg-dark: #0a0a0a;
+            --surface: #121212;
+            --accent: #e63946;
+            --text-main: #eeeeee;
+            --text-dim: #888888;
+            --border: #222222;
         }
 
-        /* Tier Glow Effects */
-        .tier-ht1 { background: linear-gradient(135deg, #ff4d4d, #b30000); color: white; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 77, 0.4); }
-        .tier-lt1 { background: linear-gradient(135deg, #f97316, #9a3412); color: white; font-weight: 900; }
-        .tier-ht2 { background: #3f3f46; color: #f4f4f5; }
-
-        .glass-panel {
-            background: rgba(15, 15, 15, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-        .active-tab {
-            border-bottom: 2px solid #dc2626;
-            color: white !important;
+        /* Navbar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+        .logo {
+            font-weight: 900;
+            font-style: italic;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Hero Area */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin: 0;
+            font-style: italic;
+            letter-spacing: -3px;
+        }
+
+        /* Search & Controls */
+        .controls {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        #searchBox {
+            flex-grow: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            color: white;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        #searchBox:focus { border-color: var(--accent); }
+
+        /* The Leaderboard Table */
+        .board-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 60px 1fr 120px 100px 100px;
+            padding: 18px 25px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-row {
+            background: #1a1a1a;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .player-cell {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-cell img {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+        }
+
+        .player-name { font-weight: 700; }
+        .player-title { 
+            display: block; 
+            font-size: 10px; 
+            color: var(--text-dim); 
+            margin-top: 2px;
+        }
+
+        /* Tier Tags */
+        .tier-tag {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 900;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .ht1 { background: var(--accent); color: white; box-shadow: 0 0 10px rgba(230, 57, 70, 0.3); }
+        .lt1 { background: #d4a373; color: black; }
+        .ht2 { background: #444; color: white; }
+
+        .region { color: var(--text-dim); font-size: 12px; font-weight: 700; text-align: center; }
+        .points { font-family: monospace; text-align: right; color: var(--accent); font-weight: bold; }
+
+        /* Hover effect */
+        .row:not(.header-row):hover {
+            background: rgba(255, 255, 255, 0.02);
+            cursor: default;
+        }
     </style>
 </head>
-<body class="pb-20">
+<body>
 
-    <nav class="sticky top-0 z-50 glass-panel border-b border-white/5 p-4">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-red-600 w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl italic shadow-lg shadow-red-600/20">N</div>
-                <span class="text-2xl font-black tracking-tighter uppercase italic">Nextra<span class="text-red-600 underline decoration-2 underline-offset-4">Tiers</span></span>
-            </div>
-            <div class="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                <a href="#" class="hover:text-white transition active-tab">Sword</a>
-                <a href="#" class="hover:text-white transition">Axe</a>
-                <a href="#" class="hover:text-white transition text-red-500">Apply</a>
-            </div>
-            <button onclick="window.location.href='#'" class="bg-white text-black px-5 py-2 rounded-full text-xs font-black uppercase hover:bg-red-600 hover:text-white transition-all">Discord</button>
+    <header>
+        <div class="logo">NEXT<span>RA</span></div>
+        <div class="nav-links">
+            <a href="#">Sword</a>
+            <a href="#">Axe</a>
+            <a href="#">UHC</a>
+            <a href="#" style="color: var(--accent);">Discord</a>
         </div>
-    </nav>
-
-    <header class="max-w-4xl mx-auto pt-16 pb-8 px-6 text-center">
-        <div class="inline-block bg-red-600/10 text-red-500 text-[10px] font-bold px-3 py-1 rounded-full mb-4 border border-red-500/20 uppercase tracking-widest">Global Rankings Live</div>
-        <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-4 italic uppercase">Elite Combat.</h1>
-        <p class="text-zinc-500 text-sm md:text-base max-w-lg mx-auto italic">The definitive list of the strongest players in the Nextra competitive scene.</p>
     </header>
 
-    <div class="max-w-4xl mx-auto px-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="glass-panel p-4 rounded-2xl text-center">
-            <p class="text-zinc-600 text-[9px] uppercase font-black tracking-widest">Registered</p>
-            <p class="text-xl font-black text-white">412</p>
+    <div class="hero">
+        <h1>LEADERBOARD</h1>
+        <p style="color: var(--text-dim);">Official skill rankings for the Nextra community.</p>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="searchBox" placeholder="Find a player..." onkeyup="doSearch()">
+    </div>
+
+    <div class="board-container">
+        <div class="row header-row">
+            <span>#</span>
+            <span>Player</span>
+            <span style="text-align: center;">Region</span>
+            <span style="text-align: center;">Tier</span>
+            <span style="text-align: right;">Points</span>
         </div>
-        <div class="glass-panel p-4 rounded-2xl text-center">
-            <p class="text-zinc-600 text-[9px] uppercase font-black tracking-widest">Tier 1s</p>
-            <p class="text-xl font-black text-red-600">08</p>
-        </div>
-        <div class="glass-panel p-4 rounded-2xl text-center">
-            <p class="text-zinc-600 text-[9px] uppercase font-black tracking-widest">Region</p>
-            <p class="text-xl font-black text-white">Global</p>
-        </div>
-        <div class="glass-panel p-4 rounded-2xl text-center">
-            <p class="text-zinc-600 text-[9px] uppercase font-black tracking-widest">Status</p>
-            <p class="text-xl font-black text-green-500">Open</p>
+
+        <div id="playerList">
+            <div class="row player-item">
+                <span style="color: #444; font-weight: bold;">01</span>
+                <div class="player-cell">
+                    <img src="https://mc-heads.net/avatar/Kaiser1s/32">
+                    <div>
+                        <span class="player-name">Kaiser1s</span>
+                        <span class="player-title">Founder</span>
+                    </div>
+                </div>
+                <div class="region">NA</div>
+                <div style="text-align: center;"><span class="tier-tag ht1">HT1</span></div>
+                <span class="points">2,940</span>
+            </div>
+
+            <div class="row player-item">
+                <span style="color: #444; font-weight: bold;">02</span>
+                <div class="player-cell">
+                    <img src="https://mc-heads.net/avatar/Dream/32">
+                    <div>
+                        <span class="player-name">Dream</span>
+                        <span class="player-title">Veteran</span>
+                    </div>
+                </div>
+                <div class="region">EU</div>
+                <div style="text-align: center;"><span class="tier-tag lt1">LT1</span></div>
+                <span class="points">2,150</span>
+            </div>
         </div>
     </div>
 
-    <main class="max-w-4xl mx-auto px-4">
-        <div class="mb-6 flex flex-col md:flex-row gap-4">
-            <div class="relative flex-grow">
-                <input type="text" id="playerSearch" onkeyup="searchPlayers()" placeholder="Search player name..." 
-                    class="w-full bg-zinc-900/50 border border-white/5 p-4 pl-12 rounded-2xl outline-none focus:border-red-600/50 transition text-sm text-white">
-                <span class="absolute left-4 top-4 opacity-20">🔍</span>
-            </div>
-            <select class="bg-zinc-900/50 border border-white/5 p-4 rounded-2xl text-xs font-bold uppercase tracking-widest text-zinc-400 outline-none">
-                <option>All Regions</option>
-                <option>North America</option>
-                <option>Europe</option>
-                <option>Asia</option>
-            </select>
-        </div>
-
-        <div class="glass-panel rounded-3xl overflow-hidden shadow-2xl">
-            <div class="grid grid-cols-5 p-5 text-[10px] font-black uppercase tracking-widest text-zinc-600 border-b border-white/5 bg-white/5">
-                <span class="col-span-2">Username</span>
-                <span class="text-center">Region</span>
-                <span class="text-center">Tier</span>
-                <span class="text-right">Points</span>
-            </div>
-
-            <div id="leaderboard" class="max-h-[600px] overflow-y-auto">
-                
-                <div class="player-entry grid grid-cols-5 p-5 items-center border-b border-white/5 hover:bg-white/5 transition-all group">
-                    <div class="col-span-2 flex items-center gap-4">
-                        <span class="text-zinc-800 font-black italic group-hover:text-red-600 transition">#01</span>
-                        <img src="https://mc-heads.net/avatar/Kaiser1s/40" class="rounded-xl shadow-lg border border-white/5">
-                        <div>
-                            <p class="player-name font-black text-white group-hover:text-red-500 transition-colors">Kaiser1s</p>
-                            <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-tighter">Nextra Owner</p>
-                        </div>
-                    </div>
-                    <div class="text-center"><span class="bg-zinc-800/50 text-zinc-400 px-2 py-1 rounded text-[10px] font-bold border border-white/5">NA</span></div>
-                    <div class="flex justify-center">
-                        <span class="tier-ht1 px-4 py-1 rounded-lg text-[10px] italic">HT1</span>
-                    </div>
-                    <span class="text-right font-mono text-white font-bold tracking-tighter">3,500</span>
-                </div>
-
-                <div class="player-entry grid grid-cols-5 p-5 items-center border-b border-white/5 hover:bg-white/5 transition-all group">
-                    <div class="col-span-2 flex items-center gap-4">
-                        <span class="text-zinc-800 font-black italic group-hover:text-zinc-400">#02</span>
-                        <img src="https://mc-heads.net/avatar/Dream/40" class="rounded-xl shadow-lg border border-white/5 grayscale group-hover:grayscale-0 transition">
-                        <div>
-                            <p class="player-name font-black text-white">Dream</p>
-                            <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-tighter">Veteran</p>
-                        </div>
-                    </div>
-                    <div class="text-center"><span class="bg-zinc-800/50 text-zinc-400 px-2 py-1 rounded text-[10px] font-bold border border-white/5">EU</span></div>
-                    <div class="flex justify-center">
-                        <span class="tier-lt1 px-4 py-1 rounded-lg text-[10px] italic">LT1</span>
-                    </div>
-                    <span class="text-right font-mono text-zinc-500 font-bold tracking-tighter">2,810</span>
-                </div>
-
-                <div class="player-entry grid grid-cols-5 p-5 items-center border-b border-white/5 hover:bg-white/5 transition-all group">
-                    <div class="col-span-2 flex items-center gap-4">
-                        <span class="text-zinc-800 font-black italic group-hover:text-zinc-400">#03</span>
-                        <img src="https://mc-heads.net/avatar/Technoblade/40" class="rounded-xl shadow-lg border border-white/5 grayscale group-hover:grayscale-0 transition">
-                        <div>
-                            <p class="player-name font-black text-white">Techno</p>
-                            <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-tighter">Elite</p>
-                        </div>
-                    </div>
-                    <div class="text-center"><span class="bg-zinc-800/50 text-zinc-400 px-2 py-1 rounded text-[10px] font-bold border border-white/5">NA</span></div>
-                    <div class="flex justify-center">
-                        <span class="tier-ht2 px-4 py-1 rounded-lg text-[10px] italic">HT2</span>
-                    </div>
-                    <span class="text-right font-mono text-zinc-500 font-bold tracking-tighter">2,450</span>
-                </div>
-
-            </div>
-        </div>
-    </main>
-
-    <footer class="mt-20 text-center py-10 border-t border-white/5">
-        <p class="text-zinc-700 text-[10px] font-black uppercase tracking-[0.3em]">Nextra Tierlist &copy; 2026</p>
-    </footer>
-
     <script>
-        function searchPlayers() {
-            let input = document.getElementById('playerSearch').value.toLowerCase();
-            let entries = document.getElementsByClassName('player-entry');
-            for (let i = 0; i < entries.length; i++) {
-                let name = entries[i].querySelector('.player-name').innerText.toLowerCase();
-                if (name.includes(input)) {
-                    entries[i].style.display = "grid";
+        // Simple search function
+        function doSearch() {
+            var input = document.getElementById("searchBox").value.toLowerCase();
+            var items = document.getElementsByClassName("player-item");
+
+            for (var i = 0; i < items.length; i++) {
+                var name = items[i].getElementsByClassName("player-name")[0].innerText;
+                if (name.toLowerCase().indexOf(input) > -1) {
+                    items[i].style.display = "grid";
                 } else {
-                    entries[i].style.display = "none";
+                    items[i].style.display = "none";
                 }
             }
         }
     </script>
+
 </body>
 </html>
